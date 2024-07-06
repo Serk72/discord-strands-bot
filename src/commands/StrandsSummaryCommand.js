@@ -49,8 +49,6 @@ class StrandsSummaryCommand {
     if (latestGame?.spangram && latestGame?.spangram?.trim() !== '') {
       const tenorApiKey = config.get('tenorApiKey');
       if (tenorApiKey) {
-        logger.info('Getting Gif');
-        logger.info(`https://tenor.googleapis.com/v2/search?key=${tenorApiKey}&q=${latestGame?.spangram}&limit=1`);
         const url = `https://tenor.googleapis.com/v2/search?key=${tenorApiKey}&q=${latestGame?.spangram}&limit=1`;
         const response = await fetch(url, {method: 'Get'})
             .then((res) => res?.json())
