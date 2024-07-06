@@ -1,0 +1,7 @@
+config/dev.json
+config/prod.json
+discord-strands-helm/*
+release.sh
+persistance.yaml
+node_modules
+coverage
