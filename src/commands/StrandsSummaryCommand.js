@@ -49,6 +49,8 @@ class StrandsSummaryCommand {
     if (latestGame?.spangram && latestGame?.spangram?.trim() !== '') {
       const tenorApiKey = config.get('tenorApiKey');
       if (tenorApiKey) {
+        logger.info('Getting Gif');
+        logger.info(`https://tenor.googleapis.com/v2/search?key=${tenorApiKey}&q=${latestGame?.spangram}&limit=1`);
         const url = `https://tenor.googleapis.com/v2/search?key=${tenorApiKey}&q=${latestGame?.spangram}&limit=1`;
         const response = await fetch(url, {method: 'Get'})
             .then((res) => res?.json())
@@ -141,13 +143,13 @@ class StrandsSummaryCommand {
     const overallLeaderIndex = overallSummary?.[0]?.username === 'Strands Bot' ? 1 : 0;
     const day7LeaderIndex = day7Summary?.[0]?.username === 'Strands Bot' ? 1 : 0;
 
-    let highestScore = 0;
+    let lowestScore = 999;
     const todayByScore = latestScores.reduce((acc, scoreVal) => {
       if (scoreVal.username === 'Strands Bot') {
         return acc;
       }
-      if (highestScore < +scoreVal.score) {
-        highestScore = +scoreVal.score;
+      if (lowestScore > +scoreVal.score) {
+        lowestScore = +scoreVal.score;
       }
       if (!acc[+scoreVal.score]?.length) {
         acc[+scoreVal.score] = [USER_TO_NAME_MAP[scoreVal.username] || scoreVal.username];
@@ -161,7 +163,7 @@ class StrandsSummaryCommand {
 ${summaryTable.toString()}\`\`\`
 ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary?.[overallLeaderIndex]?.username] || overallSummary?.[overallLeaderIndex]?.username}***
 **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary?.[day7LeaderIndex]?.username] || day7Summary?.[day7LeaderIndex]?.username}**
-**Today's Winners: ${todayByScore[highestScore]?.join(', ')}**
+**Today's Winners: ${todayByScore[lowestScore]?.join(', ')}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;
     imageToSend = await imageToSend;
     if (interaction) {

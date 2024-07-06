@@ -49,20 +49,6 @@ class StrandsBotClient {
       newPlay = false;
     }
     const latestGame = await this.strandsGame.getLatestGame();
-    // Only post additional messages if game played was for the latest game and not bot post.
-    if (strandsNumber === Number(latestGame) && newPlay && message.author.username !== 'Strands Bot') {
-      const totalPlayes = await this.strandsScore.getTotalPlayers(guildId, channelId);
-      const gamePlayers = await this.strandsScore.getPlayersForGame(latestGame, guildId, channelId);
-      const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
-      logger.info(`Remaining players: ${remaining}`);
-      if (!remaining.length) {
-        await this.summaryCommand.execute(null, message.channel);
-      } else if (remaining.length === 1) {
-        if (remaining[0] === INSULT_USERNAME) {
-          await this.whoLeftCommand.execute(null, message.channel);
-        }
-      }
-    }
 
     const currentGame = await this.strandsGame.getStrandsGame(latestGame);
     if (!currentGame?.jsongameinfo) {
@@ -79,6 +65,21 @@ class StrandsBotClient {
       } else {
         logger.error('Unable to get solution');
         logger.error(solution);
+      }
+    }
+
+    // Only post additional messages if game played was for the latest game and not bot post.
+    if (strandsNumber === Number(latestGame) && newPlay && message.author.username !== 'Strands Bot') {
+      const totalPlayes = await this.strandsScore.getTotalPlayers(guildId, channelId);
+      const gamePlayers = await this.strandsScore.getPlayersForGame(latestGame, guildId, channelId);
+      const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
+      logger.info(`Remaining players: ${remaining}`);
+      if (!remaining.length) {
+        await this.summaryCommand.execute(null, message.channel);
+      } else if (remaining.length === 1) {
+        if (remaining[0] === INSULT_USERNAME) {
+          await this.whoLeftCommand.execute(null, message.channel);
+        }
       }
     }
   }
