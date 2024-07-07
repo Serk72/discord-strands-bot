@@ -48,6 +48,18 @@ class StrandsBotClient {
     } else {
       newPlay = false;
     }
+
+    const playScore = (await this.strandsScore.getScore(message.author.username, strandsNumber, guildId, channelId))?.score;
+
+    const reactions = this._convertScoreToEmojiList(playScore);
+
+    try {
+      await Promise.all(reactions.map((emoji) => message.react(emoji)));
+    } catch (ex) {
+      logger.error('unable to react to messaage');
+      logger.error(ex);
+    }
+
     const latestGame = await this.strandsGame.getLatestGame();
 
     const currentGame = await this.strandsGame.getStrandsGame(latestGame);
@@ -83,6 +95,59 @@ class StrandsBotClient {
       }
     }
   }
+
+  /**
+   * Converts a score to emojis.
+   * @param {*} score the score of the play
+   * @return {*} the emojis to react with.
+   */
+  _convertScoreToEmojiList(score) {
+    const emojiArray = [];
+    (score + '').split('').forEach((part) => {
+      switch (part) {
+        case '0':
+          emojiArray.push('0️⃣');
+          break;
+        case '1':
+          emojiArray.push('1️⃣');
+          break;
+        case '2':
+          emojiArray.push('2️⃣');
+          break;
+        case '3':
+          emojiArray.push('3️⃣');
+          break;
+        case '4':
+          emojiArray.push('4️⃣');
+          break;
+        case '5':
+          emojiArray.push('5️⃣');
+          break;
+        case '6':
+          emojiArray.push('6️⃣');
+          break;
+        case '7':
+          emojiArray.push('7️⃣');
+          break;
+        case '8':
+          emojiArray.push('8️⃣');
+          break;
+        case '9':
+          emojiArray.push('9️⃣');
+          break;
+        default:
+          emojiArray.push(':interrobang:');
+          break;
+      }
+    });
+
+    if (score === 1) {
+      emojiArray.push(':andy_ooh:');
+    }
+
+    return emojiArray;
+  }
+
   /**
    * Discord Edit Event Handler
    * @param {*} oldMessage The discord message before the edit.
