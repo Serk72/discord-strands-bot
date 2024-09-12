@@ -42,6 +42,7 @@ class StrandsGame {
       JsonGameInfo JSONB,
       themeWords JSONB,
       SummaryPosted BOOLEAN,
+      SummaryPostedChannels JSONB,
       Date TIMESTAMP);`;
     this.pool.query(tablesSQL, (err, res) => {
       if (err) {
@@ -99,15 +100,6 @@ class StrandsGame {
   }
 
   /**
-   * Finds the latest game recorded in the database.
-   * @return {*} the latest game recorded in the database.
-   */
-  async getLatestGameSummaryPosted() {
-    const results = await this.pool.query('SELECT * FROM StrandsGame ORDER BY StrandsGame DESC LIMIT 1', []);
-    return results?.rows?.[0]?.summaryposted;
-  }
-
-  /**
    * Creates a Strands game entry.
    * @param {*} strandsGame The game number to add.
    * @param {*} timestamp The timestamp of when the game was added.
@@ -143,6 +135,15 @@ class StrandsGame {
    */
   async summaryPosted(game) {
     await this.pool.query(`UPDATE StrandsGame SET SummaryPosted = TRUE WHERE StrandsGame = $1`, [game]);
+  }
+
+  /**
+   * Finds the latest game recorded in the database.
+   * @return {*} the latest game recorded in the database.
+   */
+  async getLatestGameSummaryPosted() {
+    const results = await this.pool.query('SELECT * FROM StrandsGame ORDER BY StrandsGame DESC LIMIT 1', []);
+    return results?.rows?.[0]?.summaryposted;
   }
 }
 module.exports = {StrandsGame};

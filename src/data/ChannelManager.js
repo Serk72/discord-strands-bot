@@ -2,25 +2,25 @@ const {Pool} = require('pg');
 const config = require('config');
 const bunyan = require('bunyan');
 const logger = bunyan.createLogger({
-  name: 'AIMessages.js',
+  name: 'ChanneManager.js',
   level: config.get('logLevel'),
 });
 const DATABASE_CONFIG = config.get('postgres');
 /**
  * Data Access Layer for the AIMessages Table
  */
-class AIMessages {
+class ChanneManager {
   pool;
   static _instance;
   /**
    * Singleton instance.
-   * @return {AIMessages} the singleton instance
+   * @return {ChanneManager} the singleton instance
    */
   static getInstance() {
-    if (!AIMessages._instance) {
-      AIMessages._instance = new AIMessages();
+    if (!ChanneManager._instance) {
+      ChanneManager._instance = new ChanneManager();
     }
-    return AIMessages._instance;
+    return ChanneManager._instance;
   }
   /**
    * Constructor
@@ -34,10 +34,12 @@ class AIMessages {
       port: DATABASE_CONFIG.port,
     });
     const tablesSQL = `CREATE TABLE IF NOT EXISTS 
-    AIMessages (
+    ChanneManager (
       Id serial PRIMARY KEY,
-      messageName VARCHAR (255) NOT NULL UNIQUE,
-      aiMessages JSONB);`;
+      GuildId VARCHAR (255),
+      ChannelId VARCHAR (255),
+      monitor BOOLEAN,
+      autoPost BOOLEAN);`;
     this.pool.query(tablesSQL, (err, res) => {
       if (err) {
         logger.error(err);
@@ -57,7 +59,7 @@ class AIMessages {
    */
   async getMessageList(messageName) {
     try {
-      const results = await this.pool.query('SELECT aiMessages FROM AIMessages WHERE messageName = $1', [messageName]);
+      const results = await this.pool.query('SELECT aiMessages FROM ChanneManager WHERE messageName = $1', [messageName]);
       return results?.rows?.[0]?.aimessages?.messages;
     } catch (ex) {
       logger.error(ex);
@@ -74,7 +76,7 @@ class AIMessages {
     if (!(await this.getMessageList(messageName))?.length) {
       await this.createMessageList(messageName, messages);
     }
-    await this.pool.query(`UPDATE AIMessages SET aiMessages = $1 WHERE messageName = $2`,
+    await this.pool.query(`UPDATE ChanneManager SET aiMessages = $1 WHERE messageName = $2`,
         [{messages}, messageName]);
   }
 
@@ -85,8 +87,8 @@ class AIMessages {
    * @return {*} the latest game recorded in the database.
    */
   async createMessageList(messageName, messages) {
-    await this.pool.query(`INSERT INTO AIMessages(messageName, aimessages) VALUES ($1, $2)`, [messageName, {messages}]);
+    await this.pool.query(`INSERT INTO ChanneManager(messageName, aimessages) VALUES ($1, $2)`, [messageName, {messages}]);
     return true;
   }
 }
-module.exports = {AIMessages};
+module.exports = {ChanneManager};

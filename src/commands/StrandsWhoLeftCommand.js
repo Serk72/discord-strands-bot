@@ -55,6 +55,8 @@ class StrandsWhoLeftCommand {
     if (interaction) {
       guildId = interaction.guildId;
       channelId = interaction.channelId;
+      await interaction.deferReply({ephemeral: true});
+      await interaction.followUp({content: 'Processing...', ephemeral: true});
     } else if (discordStrandsChannel) {
       guildId = discordStrandsChannel.guildId;
       channelId = discordStrandsChannel.id;
@@ -101,7 +103,7 @@ class StrandsWhoLeftCommand {
       }
     }
     if (interaction) {
-      interaction.reply({embeds: [embed]});
+      interaction.followUp({embeds: [embed]});
     } else {
       await discordStrandsChannel.send({embeds: [embed]});
     }
@@ -148,12 +150,13 @@ class StrandsWhoLeftCommand {
             logger.error(ex);
             return null;
           });
+      logger.info(response);
       messages.push(response.message);
     }
 
     if (response?.message?.content) {
       await this.aiMessages.updateMessageList('strandsInsults', messages);
-      return response.message?.content.replaceAll('[Name]', `${INSULT_USER_ID}`).replaceAll('[Player]', `${INSULT_USER_ID}`);
+      return response.message?.content.replaceAll('[name]', `${INSULT_USER_ID}`).replaceAll('[Name]', `${INSULT_USER_ID}`).replaceAll('[Player]', `${INSULT_USER_ID}`);
     } else {
       logger.error('Unable to generate insult.');
       const insultMessages = [

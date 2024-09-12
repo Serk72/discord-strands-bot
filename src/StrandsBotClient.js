@@ -51,7 +51,7 @@ class StrandsBotClient {
 
     const playScore = (await this.strandsScore.getScore(message.author.username, strandsNumber, guildId, channelId))?.score;
 
-    const reactions = this._convertScoreToEmojiList(playScore);
+    const reactions = this._convertScoreToEmojiList(playScore, message);
 
     try {
       await Promise.all(reactions.map((emoji) => message.react(emoji)));
@@ -65,7 +65,7 @@ class StrandsBotClient {
     const currentGame = await this.strandsGame.getStrandsGame(latestGame);
     if (!currentGame?.jsongameinfo) {
       const day = dayjs().format('YYYY-MM-DD');
-      const url = `https://www.nytimes.com/games-assets/strands/${day}.json`;
+      const url = `https://www.nytimes.com/svc/strands/v2/${day}.json`;
       const solution = await fetch(url, {method: 'Get'})
           .then((res) => res?.json())
           .catch((ex) => {
@@ -99,9 +99,11 @@ class StrandsBotClient {
   /**
    * Converts a score to emojis.
    * @param {*} score the score of the play
+   * @param {*} message the message to add the score too.
    * @return {*} the emojis to react with.
    */
-  _convertScoreToEmojiList(score) {
+  _convertScoreToEmojiList(score, message) {
+    let containsOne = false;
     const emojiArray = [];
     (score + '').split('').forEach((part) => {
       switch (part) {
@@ -109,7 +111,12 @@ class StrandsBotClient {
           emojiArray.push('0️⃣');
           break;
         case '1':
-          emojiArray.push('1️⃣');
+          if (!containsOne) {
+            emojiArray.push('1️⃣');
+          } else {
+            emojiArray.push('🇮');
+          }
+          containsOne = true;
           break;
         case '2':
           emojiArray.push('2️⃣');
@@ -136,13 +143,18 @@ class StrandsBotClient {
           emojiArray.push('9️⃣');
           break;
         default:
-          emojiArray.push(':interrobang:');
+          emojiArray.push('⁉️');
           break;
       }
     });
 
     if (score === 1) {
-      emojiArray.push(':andy_ooh:');
+      const reactionEmoji2 = message.guild.emojis.cache.find((emoji) => emoji.name === 'andy_ooh');
+      if (reactionEmoji2) {
+        emojiArray.push(reactionEmoji2);
+      } else {
+        emojiArray.push('🥳');
+      }
     }
 
     return emojiArray;
